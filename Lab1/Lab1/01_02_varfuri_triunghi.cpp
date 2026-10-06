@@ -11,7 +11,7 @@
 //
 //  Biblioteci
 
-#include <windows.h>        //	Utilizarea functiilor de sistem Windows (crearea de ferestre, manipularea fisierelor si directoarelor);
+//#include <windows.h>        //	Utilizarea functiilor de sistem Windows (crearea de ferestre, manipularea fisierelor si directoarelor);
 #include <stdlib.h>         //  Biblioteci necesare pentru citirea shaderelor;
 #include <stdio.h>
 #include <GL/glew.h>        //  Definește prototipurile functiilor OpenGL si constantele necesare pentru programarea OpenGL moderna; 
