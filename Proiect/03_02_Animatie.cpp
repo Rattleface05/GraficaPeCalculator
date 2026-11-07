@@ -180,10 +180,10 @@ void CreateRoadVBO(void)
 		200.0f, -300.0f, 0.0f, 1.0f,
 
 	//	Varfuri pentru axe, adica liniile de pe drum
-		-66.6f, 330.0f, 0.0f, 1.0f,
-		-66.6f,  -300.0f, 0.0f, 1.0f,
-		66.6f, -300.0f, 0.0f, 1.0f,
+		-66.6f, 300.0f, 0.0f, 1.0f,
+		-66.6f, -300.0f, 0.0f, 1.0f,
 		66.6f, 300.0f, 0.0f, 1.0f,
+		66.6f, -300.0f, 0.0f, 1.0f,
 	};
 
 	//  Culorile axelor;
@@ -313,14 +313,16 @@ void RenderFunction(void)
 	//	Culoarea;
 	codCol = 1; // Alb
 	glUniform1i(codColLocation, codCol);
-	glLineWidth(3.0);
-	glDrawArrays(GL_LINES, 4, 6);
+	glLineWidth(6.0);
+	glEnable(GL_LINE_STIPPLE);
+	glLineStipple(25,0x00FF);
+	glDrawArrays(GL_LINES, 4, 4);
 	
 
 	//	Desenarea dreptunghiului ROSU;
 	
 	//	Matricea de transformare pentru dreptunghiul ROSU; 
-	myMatrix = resizeMatrix * matrTransl * matrRot ;
+	myMatrix = resizeMatrix * matrTransl;
 	codCol = 2; // Rosu
 	// Car VAO
 	glBindVertexArray(CarVaoId);
