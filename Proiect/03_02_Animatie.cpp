@@ -73,8 +73,8 @@ void DisplayMatrix()
 	cout << "\n";
 };
 
-//	Schimba sensul animatiei spre dreapta;
-void MoveRight(void)
+//	Schimba sensul animatiei spre jos;
+void MoveDown(void)
 {
 	i = i + alpha;
 	if (i > 350.0)			//	Se asigura deplasarea stanga-dreapta pe Ox in limitele ecranului,
@@ -85,14 +85,14 @@ void MoveRight(void)
 	glutPostRedisplay();	//	Forteza redesenarea scenei;
 }
 
-//	Schimba sensul animatiei spre stanga;
-void MoveLeft(void)
+//	Schimba sensul animatiei spre sus;
+void MoveUp(void)
 {
 	i = i + alpha;
 	if (i < -350.0)			//	Se asigura deplasarea stanga-dreapta pe Ox in limitele ecranului,
-		alpha = step;		//	mai intai efectuandu-se deplasarea spre STANGA;
+		alpha = 0;		//	mai intai efectuandu-se deplasarea spre STANGA;
 	else if (i > 350.0)
-		alpha = -step;
+		alpha = -0;
 	// angle = angle + Bbeta;	//	Se actualizeaza unghiul de rotatie constant (mentine orbitarea);
 	glutPostRedisplay();	//	Forteza redesenarea scenei;
 }
@@ -101,15 +101,15 @@ void MoveLeft(void)
 void UseMouse(int button, int state, int x, int y)
 {
 	switch (button) {
-	case GLUT_LEFT_BUTTON:			//	CLICK stanga => dreptunghiurile se misca spre stanga;
-		if (state == GLUT_DOWN)
-			alpha = -step;
-		glutIdleFunc(MoveLeft);
-		break;
-	case GLUT_RIGHT_BUTTON:			//	CLICK dreapta => dreptunghiurile se misca spre drepta;
+	case GLUT_LEFT_BUTTON:			//	CLICK stanga => dreptunghiurile se misca in sus;
 		if (state == GLUT_DOWN)
 			alpha = step;
-		glutIdleFunc(MoveRight);
+		glutIdleFunc(MoveUp);
+		break;
+	case GLUT_RIGHT_BUTTON:			//	CLICK dreapta => dreptunghiurile se misca in nicaieri;
+		if (state == GLUT_DOWN)
+			alpha = -step;
+		glutIdleFunc(nullptr);
 		break;
 	default:
 		break;
@@ -344,7 +344,7 @@ int main(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);					//	Se folosesc 2 buffere (unul pentru afisare si unul pentru randare => animatii cursive) si culori RGB;
 	glutInitWindowPosition(100, 100);								//  Pozitia initiala a ferestrei;
 	glutInitWindowSize(winWidth, winHeight);									//  Dimensiunea ferestrei;
-	glutCreateWindow("Dreptunghi cu satelit - OpenGL <<nou>>");		//	Creeaza fereastra de vizualizare, indicand numele acesteia;
+	glutCreateWindow("Depasire de masini");		//	Creeaza fereastra de vizualizare, indicand numele acesteia;
 
 	//	Se initializeaza GLEW si se verifica suportul de extensii OpenGL modern disponibile pe sistemul gazda;
 	//  Trebuie initializat inainte de desenare;
