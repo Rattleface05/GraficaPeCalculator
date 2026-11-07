@@ -28,12 +28,13 @@ void main(void)
 		out_Color = vec4 (0.0, 0.0, 0.0, 0.0);
 		break;
 	case 1: 
-		out_Color=vec4 (0.0, 0.0, 1.0, 0.0);
+		out_Color=vec4 (1.0, 1.0, 1.0, 0.0);
 		break;
-	case 2:
+	case 2: 
 		out_Color=vec4 (1.0, 0.0, 0.0, 0.0);
 		break;
 	default:
+		out_Color = ex_Color;
 		break;
   };
 }

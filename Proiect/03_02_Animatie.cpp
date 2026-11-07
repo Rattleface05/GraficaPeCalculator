@@ -34,9 +34,12 @@ using namespace std;
 
 //  Identificatorii obiectelor de tip OpenGL;
 GLuint
-	VaoId,
-	VboId,
-	ColorBufferId,
+	CarVaoId,
+	CarVboId,
+	CarColorBufferId,
+	RoadVaoId,
+	RoadVboId,
+	RoadColorBufferId,
 	ProgramId,
 	myMatrixLocation,
 	matrScaleLocation,
@@ -45,7 +48,7 @@ GLuint
 	codColLocation;
 //	Dimensiunile ferestrei de afisare;
 GLfloat
-	winWidth = 800, winHeight = 600;
+	winWidth = 1200, winHeight = 900;
 //	Variabile catre matricile de transformare;
 glm::mat4
 	myMatrix, resizeMatrix, matrTransl, matrScale1, matrScale2, matrRot, matrDepl;
@@ -125,17 +128,10 @@ void CreateShaders(void)
 
 //  Se initializeaza un Vertex Buffer Object (VBO) pentru tranferul datelor spre memoria placii grafice (spre shadere);
 //  In acesta se stocheaza date despre varfuri (coordonate, culori, indici, texturare etc.);
-void CreateVBO(void)
+void CreateCarVBO(void)
 {
 	//  Coordonatele varfurilor;
 	GLfloat Vertices[] = {
-	//	Varfuri pentru axe;
-		-50.0f, 330.0f, 0.0f, 1.0f,
-		-50.0f,  -300.0f, 0.0f, 1.0f,
-		50.0f, -300.0f, 0.0f, 1.0f,
-		50.0f, 300.0f, 0.0f, 1.0f,
-		150.0f, -300.0f, 0.0f, 1.0f,
-		150.0f, 300.0f, 0.0f, 1.0f,
 	//	Varfuri pentru masina din dreapta;
 		-45.0f,  -75.0f, 0.0f, 1.0f,
 		45.0f, -75.0f, 0.0f, 1.0f,
@@ -143,7 +139,6 @@ void CreateVBO(void)
 		-45.0f,  75.0f, 0.0f, 1.0f,
 	};
 
-	//  Culorile axelor;
 	GLfloat Colors[] = {
 		1.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 0.0f, 1.0f,
@@ -154,20 +149,70 @@ void CreateVBO(void)
 	//  Transmiterea datelor prin buffere;
 
 	//  Se creeaza / se leaga un VAO (Vertex Array Object) - util cand se utilizeaza mai multe VBO;
-	glGenVertexArrays(1, &VaoId);                                                   //  Generarea VAO si indexarea acestuia catre variabila VaoId;
-	glBindVertexArray(VaoId);
+	glGenVertexArrays(1, &CarVaoId);                                                   //  Generarea VAO si indexarea acestuia catre variabila VaoId;
+	glBindVertexArray(CarVaoId);
 
 	//  Se creeaza un buffer pentru VARFURI;
-	glGenBuffers(1, &VboId);                                                        //  Generarea bufferului si indexarea acestuia catre variabila VboId;
-	glBindBuffer(GL_ARRAY_BUFFER, VboId);                                           //  Setarea tipului de buffer - atributele varfurilor;
+	glGenBuffers(1, &CarVboId);                                                        //  Generarea bufferului si indexarea acestuia catre variabila VboId;
+	glBindBuffer(GL_ARRAY_BUFFER, CarVboId);                                           //  Setarea tipului de buffer - atributele varfurilor;
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);      //  Punctele sunt "copiate" in bufferul curent;
 	//  Se asociaza atributul (0 = coordonate) pentru shader;
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//  Se creeaza un buffer pentru CULOARE;
-	glGenBuffers(1, &ColorBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
+	glGenBuffers(1, &CarColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, CarColorBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
+	//  Se asociaza atributul (1 =  culoare) pentru shader;
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+void CreateRoadVBO(void)
+{
+	//  Coordonatele varfurilor;
+	GLfloat Vertices[] = {
+	// Drumu in sine
+		-200.0f, -300.0f, 0.0f, 1.0f,
+		-200.0f, 300.0f, 0.0f, 1.0f,
+		200.0f, 300.0f, 0.0f, 1.0f,
+		200.0f, -300.0f, 0.0f, 1.0f,
+
+	//	Varfuri pentru axe, adica liniile de pe drum
+		-66.6f, 330.0f, 0.0f, 1.0f,
+		-66.6f,  -300.0f, 0.0f, 1.0f,
+		66.6f, -300.0f, 0.0f, 1.0f,
+		66.6f, 300.0f, 0.0f, 1.0f,
+	};
+
+	//  Culorile axelor;
+	GLfloat Colors[] = {
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+	};
+
+	//  Transmiterea datelor prin buffere;
+
+	//  Se creeaza / se leaga un VAO (Vertex Array Object) - util cand se utilizeaza mai multe VBO;
+	glGenVertexArrays(1, &RoadVaoId);                                                   //  Generarea VAO si indexarea acestuia catre variabila VaoId;
+	glBindVertexArray(RoadVaoId);
+
+	//  Se creeaza un buffer pentru VARFURI;
+	glGenBuffers(1, &RoadVboId);                                                        //  Generarea bufferului si indexarea acestuia catre variabila VboId;
+	glBindBuffer(GL_ARRAY_BUFFER, RoadVboId);                                           //  Setarea tipului de buffer - atributele varfurilor;
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);      //  Punctele sunt "copiate" in bufferul curent;
+	//  Se asociaza atributul (0 = coordonate) pentru shader;
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	//  Se creeaza un buffer pentru CULOARE;
+	glGenBuffers(1, &RoadColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, RoadColorBufferId);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
 	//  Se asociaza atributul (1 =  culoare) pentru shader;
 	glEnableVertexAttribArray(1);
@@ -181,7 +226,7 @@ void DestroyShaders(void)
 }
 
 //  Eliminarea obiectelor de tip VBO dupa rulare;
-void DestroyVBO(void)
+void DestroyCarVBO(void)
 {
 	//  Eliberarea atributelor din shadere (pozitie, culoare, texturare etc.);
 	glDisableVertexAttribArray(1);
@@ -189,26 +234,44 @@ void DestroyVBO(void)
 
 	//  Stergerea bufferelor pentru varfuri, culori;
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &ColorBufferId);
-	glDeleteBuffers(1, &VboId);
+	glDeleteBuffers(1, &CarColorBufferId);
+	glDeleteBuffers(1, &CarVboId);
 
 	//  Eliberaea obiectelor de tip VAO;
 	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &VaoId);
+	glDeleteVertexArrays(1, &CarVaoId);
+}
+
+void DestroyRoadVBO(void)
+{
+	//  Eliberarea atributelor din shadere (pozitie, culoare, texturare etc.);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(0);
+
+	//  Stergerea bufferelor pentru varfuri, culori;
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &RoadColorBufferId);
+	glDeleteBuffers(1, &RoadVboId);
+
+	//  Eliberaea obiectelor de tip VAO;
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &RoadVaoId);
 }
 
 //  Functia de eliberare a resurselor alocate de program;
 void Cleanup(void)
 {
 	DestroyShaders();
-	DestroyVBO();
+	DestroyCarVBO();
+	DestroyRoadVBO();
 }
 
 //  Setarea parametrilor necesari pentru fereastra de vizualizare;
 void Initialize(void)
 {
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);		//  Culoarea de fond a ecranului;
-	CreateVBO();								//  Trecerea datelor de randare spre bufferul folosit de shadere;
+	glClearColor(0.0f, 1.0f, 0.0f, 0.0f);		//  Culoarea de fond a ecranului;
+	CreateCarVBO();								//  Trecerea datelor de randare spre bufferul folosit de shadere;
+	CreateRoadVBO();
 	CreateShaders();							//  Initilizarea shaderelor;
 	//	Instantierea variabilelor uniforme pentru a "comunica" cu shaderele;
 	codColLocation = glGetUniformLocation(ProgramId, "codCol");
@@ -232,28 +295,39 @@ void RenderFunction(void)
 	
 	//	Matricea de redimensionare (pentru elementele "fixe" - axele);
 	myMatrix = resizeMatrix;
-	//	Culoarea;
-	codCol = 0;
+	
+	// Road VAO
+	glBindVertexArray(RoadVaoId);
 	//	Transmiterea variabilelor uniforme pentru MATRICE DE TRANSFORMARE si COLORARE spre shadere;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-	glUniform1i(codColLocation, codCol);
+	
 	//  Functia de desenare primeste 3 argumente:
 	//  - arg1 = tipul primitivei desenate,
 	//  - arg2 = indicele primului punct de desenat din buffer,
 	//  - arg3 = numarul de puncte consecutive de desenat;
+	//	Culoarea drumului
+	codCol = 0; // Negru
+	glUniform1i(codColLocation, codCol);
 	glLineWidth(3.0);
-	glDrawArrays(GL_LINES, 0, 6);
+	glDrawArrays(GL_POLYGON, 0, 4);
+	//	Culoarea;
+	codCol = 1; // Alb
+	glUniform1i(codColLocation, codCol);
+	glLineWidth(3.0);
+	glDrawArrays(GL_LINES, 4, 6);
 	
 
 	//	Desenarea dreptunghiului ROSU;
 	
 	//	Matricea de transformare pentru dreptunghiul ROSU; 
 	myMatrix = resizeMatrix * matrTransl * matrRot ;
-	codCol = 2;
+	codCol = 2; // Rosu
+	// Car VAO
+	glBindVertexArray(CarVaoId);
 	//	Transmiterea variabilelor uniforme pentru MATRICE DE TRANSFORMARE si COLORARE spre shadere;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 	glUniform1i(codColLocation, codCol);
-	glDrawArrays(GL_POLYGON, 6, 4);
+	glDrawArrays(GL_POLYGON, 0, 4);
 
 	glutSwapBuffers();	//	Inlocuieste imaginea deseneata in fereastra cu cea randata; 
 	glFlush();	//  Asigura rularea tuturor comenzilor OpenGL apelate anterior;
