@@ -315,7 +315,7 @@ void RenderFunction(void)
 	glUniform1i(codColLocation, codCol);
 	glLineWidth(6.0);
 	glEnable(GL_LINE_STIPPLE);
-	glLineStipple(25,0x00FF);
+	glLineStipple(15,0x07FF);
 	glDrawArrays(GL_LINES, 4, 4);
 	
 
