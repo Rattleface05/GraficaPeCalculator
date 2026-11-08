@@ -51,7 +51,7 @@ GLfloat
 	winWidth = 1200, winHeight = 900;
 //	Variabile catre matricile de transformare;
 glm::mat4
-	myMatrix, resizeMatrix, matrTransl, matrScale1, matrScale2, matrRot, matrDepl;
+	myMatrix, resizeMatrix, matrTransl1, matrTransl2, matrTransl3, matrScale1, matrScale2, matrRot, matrDepl;
 
 //	Variabila ce determina schimbarea culorii pixelilor in shader;
 int codCol;			
@@ -91,7 +91,7 @@ void MoveUp(void)
 	i = i + alpha;
 	if (i < -350.0)			//	Se asigura deplasarea stanga-dreapta pe Ox in limitele ecranului,
 		alpha = 0;		//	mai intai efectuandu-se deplasarea spre STANGA;
-	else if (i > 350.0)
+	else if (i > 600.0)
 		alpha = -0;
 	// angle = angle + Bbeta;	//	Se actualizeaza unghiul de rotatie constant (mentine orbitarea);
 	glutPostRedisplay();	//	Forteza redesenarea scenei;
@@ -132,11 +132,22 @@ void CreateCarVBO(void)
 {
 	//  Coordonatele varfurilor;
 	GLfloat Vertices[] = {
-	//	Varfuri pentru masina din dreapta;
-		-45.0f,  -75.0f, 0.0f, 1.0f,
-		45.0f, -75.0f, 0.0f, 1.0f,
-		45.0f,  75.0f, 0.0f, 1.0f,
-		-45.0f,  75.0f, 0.0f, 1.0f,
+	//	Varfuri pentru masina din mijloc;
+		-45.0f,  -245.0f, 0.0f, 1.0f,
+		45.0f, -245.0f, 0.0f, 1.0f,
+		44.0f,  -95.0f, 0.0f, 1.0f,
+		-44.0f,  -95.0f, 0.0f, 1.0f,
+	// Varfuri pt masina din dreapta
+		85.0f,  -265.0f, 0.0f, 1.0f,
+		175.0f, -265.0f, 0.0f, 1.0f,
+		175.0f,  -115.0f, 0.0f, 1.0f,
+		85.0f,  -115.0f, 0.0f, 1.0f,
+	// Varfuri pt masina din stanga aka aia de depaseste
+		-175.0f,  -295.0f, 0.0f, 1.0f,
+		-85.0f, -295.0f, 0.0f, 1.0f,
+		-85.0f,  -145.0f, 0.0f, 1.0f,
+		-175.0f,  -145.0f, 0.0f, 1.0f,		
+	
 	};
 
 	GLfloat Colors[] = {
@@ -285,7 +296,9 @@ void RenderFunction(void)
 	
 	// TO DO: schimbati transformarile (de exemplu deplasarea are loc pe axa Oy sau pe o alta dreapta);
 	resizeMatrix = glm::ortho(xMin, xMax, yMin, yMax);							//	"Aducem" scena la "patratul standard" [-1,1]x[-1,1];
-	matrTransl = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, i, 0.0));		//	Translatie de-a lungul axei Ox;
+	matrTransl1 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, i, 0.0));		//	Translatie de-a lungul axei Oy;
+	matrTransl2 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, i * 1.6f, 0.0));		
+	matrTransl3 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, i * 2.6f, 0.0));		
 	matrDepl = glm::translate(glm::mat4(1.0f), glm::vec3(0, 80.0, 0.0));		//	Translatie pentru patratul ROSU fata de patratul ALBASTRU;
 	matrScale1 = glm::scale(glm::mat4(1.0f), glm::vec3(1.1, 0.3, 0.0));			//	Scalare a coordonatelor initiale; se obtine dreptunghiul ALABSTRU;
 	matrScale2 = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.0));		//	Scalare a coordonatelor initiale; se obtine patratul ROSU;
@@ -322,7 +335,7 @@ void RenderFunction(void)
 	//	Desenarea dreptunghiului ROSU;
 	
 	//	Matricea de transformare pentru dreptunghiul ROSU; 
-	myMatrix = resizeMatrix * matrTransl;
+	myMatrix = resizeMatrix * matrTransl1;
 	codCol = 2; // Rosu
 	// Car VAO
 	glBindVertexArray(CarVaoId);
@@ -330,6 +343,14 @@ void RenderFunction(void)
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 	glUniform1i(codColLocation, codCol);
 	glDrawArrays(GL_POLYGON, 0, 4);
+
+	myMatrix = resizeMatrix * matrTransl2;
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+	glDrawArrays(GL_POLYGON, 4, 4);
+
+	myMatrix = resizeMatrix * matrTransl3;
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+	glDrawArrays(GL_POLYGON, 8, 4);
 
 	glutSwapBuffers();	//	Inlocuieste imaginea deseneata in fereastra cu cea randata; 
 	glFlush();	//  Asigura rularea tuturor comenzilor OpenGL apelate anterior;
