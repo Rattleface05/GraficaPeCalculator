@@ -58,7 +58,17 @@ int codCol;
 //	Variabile pentru proiectia ortogonala;
 float xMin = -450.f, xMax = 450.f, yMin = -300.f, yMax = 300.f;
 //	Variabile pentru deplasarea pe axa Ox si pentru rotatie;
-float i = 0.0, alpha = 0.0, step=1.0, Bbeta = 0.02, angle = 0;
+float middleCarY = 0.0, viteza = 0.6, Bbeta = 0.02, angle = -0.0f;
+
+// Coordonate pentru masina din dreapta (acolo de decor)
+float rightCarY = 0.0;
+
+// Coordonate pentru masina care face depasirea
+float passingCarX = 0.0, passingCarY = -14.0;
+
+// 0 inseamna ca inca nu poate depasi masina, 1 inseamna ca se depaseste, 2 inseamna ca s-a terminat depasirea
+int codDepasire = 0;
+float vitezaDepasire = 3.0f;
 
 
 //	Functie pentru afisarea matricei de transformare;
@@ -73,42 +83,98 @@ void DisplayMatrix()
 	cout << "\n";
 };
 
-//	Schimba sensul animatiei spre jos;
-void MoveDown(void)
-{
-	i = i + alpha;
-	if (i > 350.0)			//	Se asigura deplasarea stanga-dreapta pe Ox in limitele ecranului,
-		alpha = -step;		//	mai intai efectuandu-se deplasarea spre DREAPTA;
-	else if (i < -350.0)
-		alpha = step;
-	// angle = angle - Bbeta;	//	Se actualizeaza unghiul de rotatie constant (mentine orbitarea);
-	glutPostRedisplay();	//	Forteza redesenarea scenei;
+// Miscarea masinii depasitoare
+void AnimeazaDepasire(void){
+
+	// Daca merg offscreen, they loop
+	if (rightCarY > 600.0f){
+		rightCarY = -200.0f;
+	}
+
+	if (middleCarY > 600.0f){
+		middleCarY = -200.0f;
+	}
+
+	if (passingCarY > 600.0f){
+		passingCarY = -200.0f;
+		passingCarX = 0.0f;
+		angle = 0.0f;
+		codDepasire = 0;
+	}
+
+	// Codul din MoveUp
+	middleCarY += viteza * 2.5;
+	rightCarY += viteza * 3.1;
+
+	
+	float distanta = passingCarY - middleCarY;
+
+	switch (codDepasire)
+    {
+        case 0:
+            passingCarY += vitezaDepasire - 0.3f;
+            if (distanta > 180.0f && distanta < 300.0f)
+            {
+                codDepasire = 1;
+            }
+            break;
+
+        case 1:
+            passingCarY += vitezaDepasire;
+            passingCarX += 4.5f;
+
+			// Unghi gradual, frumos
+			if (angle > -0.36f)
+            	angle -= 0.05f;
+
+            if (passingCarX > 130.0f)
+            {
+                codDepasire = 2;
+            }
+            break;
+
+        case 2:
+            passingCarY += viteza + 2;
+			
+			if (angle < -0.05f)
+			angle += 0.05f;
+			
+            break;
+    }
+	glutPostRedisplay();
 }
 
+//	Schimba sensul animatiei spre jos;
+// void MoveDown(void)
+// {
+// 	middleCarY = middleCarY + viteza;
+// 	if (middleCarY > 350.0)			//	Se asigura deplasarea stanga-dreapta pe Ox in limitele ecranului,
+// 		viteza = -step;		//	mai intai efectuandu-se deplasarea spre DREAPTA;
+// 	else if (middleCarY < -350.0)
+// 		viteza = step;
+// 	glutPostRedisplay();	//	Forteza redesenarea scenei;
+// }
+
 //	Schimba sensul animatiei spre sus;
-void MoveUp(void)
-{
-	i = i + alpha;
-	if (i < -350.0)			//	Se asigura deplasarea stanga-dreapta pe Ox in limitele ecranului,
-		alpha = 0;		//	mai intai efectuandu-se deplasarea spre STANGA;
-	else if (i > 600.0)
-		alpha = -0;
-	// angle = angle + Bbeta;	//	Se actualizeaza unghiul de rotatie constant (mentine orbitarea);
-	glutPostRedisplay();	//	Forteza redesenarea scenei;
-}
+// void MoveUp(void)
+// {
+// 	middleCarY = middleCarY + viteza;
+// 	if (middleCarY < -350.0)			//	Se asigura deplasarea stanga-dreapta pe Ox in limitele ecranului,
+// 		viteza = 0;		//	mai intai efectuandu-se deplasarea spre STANGA;
+// 	else if (middleCarY > 600.0)
+// 		viteza = -0;
+// 	// angle = angle + Bbeta;	//	Se actualizeaza unghiul de rotatie constant (mentine orbitarea);
+// 	glutPostRedisplay();	//	Forteza redesenarea scenei;
+// }
 
 //	Functie ce modifica deplasarea dreptunghiurilor in functie de apasarea butoanelor de pe mouse;
 void UseMouse(int button, int state, int x, int y)
 {
 	switch (button) {
 	case GLUT_LEFT_BUTTON:			//	CLICK stanga => dreptunghiurile se misca in sus;
-		if (state == GLUT_DOWN)
-			alpha = step;
-		glutIdleFunc(MoveUp);
+		glutIdleFunc(AnimeazaDepasire);
 		break;
 	case GLUT_RIGHT_BUTTON:			//	CLICK dreapta => dreptunghiurile se misca in nicaieri;
-		if (state == GLUT_DOWN)
-			alpha = -step;
 		glutIdleFunc(nullptr);
 		break;
 	default:
@@ -296,15 +362,14 @@ void RenderFunction(void)
 	
 	// TO DO: schimbati transformarile (de exemplu deplasarea are loc pe axa Oy sau pe o alta dreapta);
 	resizeMatrix = glm::ortho(xMin, xMax, yMin, yMax);							//	"Aducem" scena la "patratul standard" [-1,1]x[-1,1];
-	matrTransl1 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, i, 0.0));		//	Translatie de-a lungul axei Oy;
-	matrTransl2 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, i * 1.6f, 0.0));		
-	matrTransl3 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, i * 2.6f, 0.0));		
+	matrTransl1 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, middleCarY, 0.0));		//	Translatie de-a lungul axei Oy;
+	matrTransl2 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, rightCarY, 0.0));		
+	matrTransl3 = glm::translate(glm::mat4(1.0f), glm::vec3(passingCarX, passingCarY, 0.0));		
 	matrDepl = glm::translate(glm::mat4(1.0f), glm::vec3(0, 80.0, 0.0));		//	Translatie pentru patratul ROSU fata de patratul ALBASTRU;
 	matrScale1 = glm::scale(glm::mat4(1.0f), glm::vec3(1.1, 0.3, 0.0));			//	Scalare a coordonatelor initiale; se obtine dreptunghiul ALABSTRU;
 	matrScale2 = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.0));		//	Scalare a coordonatelor initiale; se obtine patratul ROSU;
 	matrRot = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0, 0.0, 1.0));	//	Roatie folosita la deplasarea patratului ROSU;
 
-	//	Desenarea axelor (fixe);
 	
 	//	Matricea de redimensionare (pentru elementele "fixe" - axele);
 	myMatrix = resizeMatrix;
@@ -334,7 +399,7 @@ void RenderFunction(void)
 
 	//	Desenarea dreptunghiului ROSU;
 	
-	//	Matricea de transformare pentru dreptunghiul ROSU; 
+	//	Masinile
 	myMatrix = resizeMatrix * matrTransl1;
 	codCol = 2; // Rosu
 	// Car VAO
@@ -348,7 +413,9 @@ void RenderFunction(void)
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 	glDrawArrays(GL_POLYGON, 4, 4);
 
-	myMatrix = resizeMatrix * matrTransl3;
+	codCol = 3;
+	glUniform1i(codColLocation, codCol);
+	myMatrix = resizeMatrix * matrTransl3 * glm::translate(glm::mat4(1.0f), glm::vec3(-130.0f, -220.0f, 0.0f)) * matrRot * glm::translate(glm::mat4(1.0f), glm::vec3(130.0f, 220.0f, 0.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 	glDrawArrays(GL_POLYGON, 8, 4);
 
