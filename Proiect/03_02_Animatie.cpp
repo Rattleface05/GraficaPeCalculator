@@ -113,7 +113,7 @@ void AnimeazaDepasire(void){
     {
         case 0:
             passingCarY += vitezaDepasire - 0.3f;
-            if (distanta > 180.0f && distanta < 300.0f)
+            if (distanta > 170.0f && distanta < 190.0f)
             {
                 codDepasire = 1;
             }
@@ -123,7 +123,9 @@ void AnimeazaDepasire(void){
             passingCarY += vitezaDepasire;
             passingCarX += 4.5f;
 
-			// Unghi gradual, frumos
+			middleCarY -= 0.9f;
+
+			// Unghi gradual, frumos. deosebit
 			if (angle > -0.36f)
             	angle -= 0.05f;
 
