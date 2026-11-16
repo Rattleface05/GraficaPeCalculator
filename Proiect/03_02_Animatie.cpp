@@ -159,7 +159,7 @@ void AnimeazaDepasire(void){
             break;
 
         case 2:
-            passingCarY += viteza + 2;
+            passingCarY += vitezaDepasire - 1;
 			
 			if (angle < -0.00f)
 			angle += 0.05f;
