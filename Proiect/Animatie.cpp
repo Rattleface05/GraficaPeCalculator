@@ -59,7 +59,7 @@ GLfloat
 	winWidth = 1200, winHeight = 900;
 //	Variabile catre matricile de transformare;
 glm::mat4
-	myMatrix, resizeMatrix, matrTransl1, matrTransl2, matrTransl3, matrScale1, matrScale2, matrRot, matrDepl;
+	myMatrix, resizeMatrix, matrTransl1, matrTransl2, matrTransl3, matrRot;
 
 //	Variabila ce determina schimbarea culorii pixelilor in shader;
 int codCol;			
@@ -74,9 +74,10 @@ float rightCarY = 0.0;
 // Coordonate pentru masina care face depasirea
 float passingCarX = 130.0, passingCarY = -200.0;
 
-// -2 inseamna ca e in spatele masinii, -1 inseamna ca trece in depasire, 0 inseamna ca inca nu poate depasi masina, 1 inseamna ca se depaseste, 2 inseamna ca s-a terminat depasirea
+// -2 inseamna ca e in spatele masinii, -1 inseamna ca trece in depasire, 
+// 0 inseamna ca inca nu poate depasi masina, 1 inseamna ca se depaseste, 2 inseamna ca s-a terminat depasirea
 int codDepasire = -2;
-float vitezaDepasire = 3.0f * 2;
+float vitezaDepasire = 6.0f;
 
 // Copaceii
 int treeSegments = 24;
@@ -84,7 +85,6 @@ int treeVertexCount = treeSegments + 2;
 int treeCount = 6;
 
 
-// Miscarea masinii depasitoare
 void AnimeazaDepasire(void){
 	// Daca merg offscreen, they loop
 	if (rightCarY > 600.0f){
@@ -96,7 +96,7 @@ void AnimeazaDepasire(void){
 	}
 
 	if (passingCarY > 600.0f){
-		passingCarY = min(-200.0f, middleCarY - 200.0f);
+		passingCarY = min(-250.0f, middleCarY - 250.0f);
 		passingCarX = 130.0f;
 		angle = 0.0f;
 		codDepasire = -2;
@@ -238,7 +238,7 @@ void LoadTexture(const char* texturePath)
 //  Shaderul de fragment / Fragment shader - afecteaza culoarea pixelilor;
 void CreateShaders(void)
 {
-	ProgramId = LoadShaders("03_02_Shader.vert", "03_02_Shader.frag");
+	ProgramId = LoadShaders("Shader.vert", "Shader.frag");
 	glUseProgram(ProgramId);
 }
 
@@ -366,7 +366,7 @@ void CreateTreeVBO(void)
 		{-270.0f,  250.0f}, {270.0f,  260.0f}
 	};
 
-	float radius = 40.0f;
+	float radius = 60.0f;
 	std::vector<GLfloat> vertices;
 	vertices.reserve(treeCount * treeVertexCount * 4);
 
@@ -385,8 +385,7 @@ void CreateTreeVBO(void)
 
 	glGenBuffers(1, &TreeVboId);
 	glBindBuffer(GL_ARRAY_BUFFER, TreeVboId);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat),
-		vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -477,14 +476,10 @@ void RenderFunction(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT);			//  Se curata ecranul OpenGL pentru a fi desenat noul continut;
 	
-	// TO DO: schimbati transformarile (de exemplu deplasarea are loc pe axa Oy sau pe o alta dreapta);
 	resizeMatrix = glm::ortho(xMin, xMax, yMin, yMax);							//	"Aducem" scena la "patratul standard" [-1,1]x[-1,1];
 	matrTransl1 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, middleCarY, 0.0));		//	Translatie de-a lungul axei Oy;
 	matrTransl2 = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, rightCarY, 0.0));		
-	matrTransl3 = glm::translate(glm::mat4(1.0f), glm::vec3(passingCarX, passingCarY, 0.0));		
-	matrDepl = glm::translate(glm::mat4(1.0f), glm::vec3(0, 80.0, 0.0));		//	Translatie pentru patratul ROSU fata de patratul ALBASTRU;
-	matrScale1 = glm::scale(glm::mat4(1.0f), glm::vec3(1.1, 0.3, 0.0));			//	Scalare a coordonatelor initiale; se obtine dreptunghiul ALABSTRU;
-	matrScale2 = glm::scale(glm::mat4(1.0f), glm::vec3(0.25, 0.25, 0.0));		//	Scalare a coordonatelor initiale; se obtine patratul ROSU;
+	matrTransl3 = glm::translate(glm::mat4(1.0f), glm::vec3(passingCarX, passingCarY, 0.0));
 	matrRot = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0, 0.0, 1.0));	//	Roatie folosita la deplasarea patratului ROSU;
 
 	
@@ -549,7 +544,8 @@ void RenderFunction(void)
 
 	codCol = 3;
 	glUniform1i(codColLocation, codCol);
-	myMatrix = resizeMatrix * matrTransl3 * glm::translate(glm::mat4(1.0f), glm::vec3(-130.0f, -220.0f, 0.0f)) * matrRot * glm::translate(glm::mat4(1.0f), glm::vec3(130.0f, 220.0f, 0.0f));
+	myMatrix = resizeMatrix * matrTransl3 * glm::translate(glm::mat4(1.0f), glm::vec3(-130.0f, -220.0f, 0.0f)) * 
+		matrRot * glm::translate(glm::mat4(1.0f), glm::vec3(130.0f, 220.0f, 0.0f));
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 	glDrawArrays(GL_POLYGON, 8, 4);
 
