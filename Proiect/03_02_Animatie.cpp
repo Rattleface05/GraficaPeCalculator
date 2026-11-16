@@ -29,6 +29,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include <soil2/SOIL2.h>		
+
 
 using namespace std;
 
@@ -45,7 +47,9 @@ GLuint
 	matrScaleLocation,
 	matrTranslLocation,
 	matrRotlLocation,
-	codColLocation;
+	codColLocation,
+	texture,
+	CarTextureBufferId;
 //	Dimensiunile ferestrei de afisare;
 GLfloat
 	winWidth = 1200, winHeight = 900;
@@ -184,6 +188,31 @@ void UseMouse(int button, int state, int x, int y)
 	}
 }
 
+//	Functia de incarcare a texturilor in program;
+void LoadTexture(const char* texturePath)
+{
+	// Generarea unui obiect textura si legarea acestuia;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	//	Desfasurarea imaginii pe orizontala/verticala in functie de parametrii de texturare;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// Modul in care structura de texeli este aplicata pe cea de pixeli;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Incarcarea texturii si transferul datelor in obiectul textura; 
+	int width, height;
+	unsigned char* image = SOIL_load_image(texturePath, &width, &height, 0, SOIL_LOAD_RGBA);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+	
+	// Eliberarea resurselor
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 //  Crearea si compilarea obiectelor de tip shader;
 //	Trebuie sa fie in acelasi director cu proiectul actual;
 //  Shaderul de varfuri / Vertex shader - afecteaza geometria scenei;
@@ -225,6 +254,12 @@ void CreateCarVBO(void)
 		1.0f, 0.0f, 0.0f, 1.0f,
 	};
 
+	GLfloat TextureCoords[] = {
+    0.0f, 0.0f,  1.0f, 0.0f,  1.0f, 1.0f,  0.0f, 1.0f,
+    0.0f, 0.0f,  1.0f, 0.0f,  1.0f, 1.0f,  0.0f, 1.0f,
+    0.0f, 0.0f,  1.0f, 0.0f,  1.0f, 1.0f,  0.0f, 1.0f
+};
+
 	//  Transmiterea datelor prin buffere;
 
 	//  Se creeaza / se leaga un VAO (Vertex Array Object) - util cand se utilizeaza mai multe VBO;
@@ -238,6 +273,12 @@ void CreateCarVBO(void)
 	//  Se asociaza atributul (0 = coordonate) pentru shader;
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glGenBuffers(1, &CarTextureBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, CarTextureBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(TextureCoords), TextureCoords, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//  Se creeaza un buffer pentru CULOARE;
 	glGenBuffers(1, &CarColorBufferId);
@@ -315,6 +356,7 @@ void DestroyCarVBO(void)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &CarColorBufferId);
 	glDeleteBuffers(1, &CarVboId);
+	glDeleteBuffers(1, &CarTextureBufferId);
 
 	//  Eliberaea obiectelor de tip VAO;
 	glBindVertexArray(0);
@@ -352,6 +394,12 @@ void Initialize(void)
 	CreateCarVBO();								//  Trecerea datelor de randare spre bufferul folosit de shadere;
 	CreateRoadVBO();
 	CreateShaders();							//  Initilizarea shaderelor;
+	LoadTexture("masina-removebg-preview.png");
+
+	// Pentru transparenta
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	//	Instantierea variabilelor uniforme pentru a "comunica" cu shaderele;
 	codColLocation = glGetUniformLocation(ProgramId, "codCol");
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
@@ -399,9 +447,15 @@ void RenderFunction(void)
 	glDrawArrays(GL_LINES, 4, 4);
 	
 
-	//	Desenarea dreptunghiului ROSU;
 	
 	//	Masinile
+
+	// Activarea / legarea texturii active
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	//	Transmiterea variabilei uniforme pentru texturare spre shaderul de fragmente;
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
 	myMatrix = resizeMatrix * matrTransl1;
 	codCol = 2; // Rosu
 	// Car VAO
