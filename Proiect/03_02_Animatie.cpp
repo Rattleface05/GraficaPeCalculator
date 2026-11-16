@@ -16,6 +16,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <iostream>			//	Biblioteca necesara pentru afisarea in consola;
+#include <cmath>
+#include <vector>
 // #include <windows.h>        //	Utilizarea functiilor de sistem Windows (crearea de ferestre, manipularea fisierelor si directoarelor);
 #include <stdlib.h>         //  Biblioteci necesare pentru citirea shaderelor;
 #include <stdio.h>
@@ -42,6 +44,8 @@ GLuint
 	RoadVaoId,
 	RoadVboId,
 	RoadColorBufferId,
+	TreeVaoId,
+	TreeVboId,
 	ProgramId,
 	myMatrixLocation,
 	matrScaleLocation,
@@ -73,6 +77,11 @@ float passingCarX = 130.0, passingCarY = -200.0;
 // -2 inseamna ca e in spatele masinii, -1 inseamna ca trece in depasire, 0 inseamna ca inca nu poate depasi masina, 1 inseamna ca se depaseste, 2 inseamna ca s-a terminat depasirea
 int codDepasire = -2;
 float vitezaDepasire = 3.0f * 2;
+
+// Copaceii
+int treeSegments = 24;
+int treeVertexCount = treeSegments + 2;
+int treeCount = 6;
 
 
 // Miscarea masinii depasitoare
@@ -349,6 +358,41 @@ void CreateRoadVBO(void)
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
+void CreateTreeVBO(void)
+{	
+	std::vector<glm::vec2> centers = {
+		{-270.0f, -220.0f}, {270.0f, -140.0f},
+		{-270.0f,   20.0f}, {270.0f,  100.0f},
+		{-270.0f,  250.0f}, {270.0f,  260.0f}
+	};
+
+	float radius = 40.0f;
+	std::vector<GLfloat> vertices;
+	vertices.reserve(treeCount * treeVertexCount * 4);
+
+	for (glm::vec2& center : centers)
+	{
+		vertices.insert(vertices.end(), {center.x, center.y, 0.0f, 1.0f});
+		for (int i = 0; i <= treeSegments; ++i)
+		{
+			float angle = 2.0f * 3.1415926f * i / treeSegments;
+			vertices.insert(vertices.end(), {center.x + radius * std::cos(angle), center.y + radius * std::sin(angle), 0.0f, 1.0f});
+		}
+	}
+
+	glGenVertexArrays(1, &TreeVaoId);
+	glBindVertexArray(TreeVaoId);
+
+	glGenBuffers(1, &TreeVboId);
+	glBindBuffer(GL_ARRAY_BUFFER, TreeVboId);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat),
+		vertices.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glDisableVertexAttribArray(1);
+}
+
 //  Elimina obiectele de tip shader dupa rulare;
 void DestroyShaders(void)
 {
@@ -389,12 +433,24 @@ void DestroyRoadVBO(void)
 	glDeleteVertexArrays(1, &RoadVaoId);
 }
 
+void DestroyTreeVBO(void)
+{
+	glBindVertexArray(TreeVaoId);
+	glDisableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &TreeVboId);
+
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &TreeVaoId);
+}
+
 //  Functia de eliberare a resurselor alocate de program;
 void Cleanup(void)
 {
 	DestroyShaders();
 	DestroyCarVBO();
 	DestroyRoadVBO();
+	DestroyTreeVBO();
 }
 
 //  Setarea parametrilor necesari pentru fereastra de vizualizare;
@@ -403,6 +459,7 @@ void Initialize(void)
 	glClearColor(0.0f, 1.0f, 0.0f, 0.0f);		//  Culoarea de fond a ecranului;
 	CreateCarVBO();								//  Trecerea datelor de randare spre bufferul folosit de shadere;
 	CreateRoadVBO();
+	CreateTreeVBO();
 	CreateShaders();							//  Initilizarea shaderelor;
 	LoadTexture("masina-removebg-preview.png");
 
@@ -456,6 +513,15 @@ void RenderFunction(void)
 	glLineStipple(15,0x07FF);
 	glDrawArrays(GL_LINES, 4, 4);
 	
+	// Copacei
+	codCol = 4;
+	glBindVertexArray(TreeVaoId);
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &resizeMatrix[0][0]);
+	glUniform1i(codColLocation, codCol);
+	for (int i = 0; i < treeCount; ++i)
+	{
+		glDrawArrays(GL_TRIANGLE_FAN, i * treeVertexCount, treeVertexCount);
+	}
 
 	
 	//	Masinile

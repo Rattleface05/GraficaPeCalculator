@@ -43,6 +43,9 @@ void main(void)
 	case 3: 
 		out_Color = vec4(mix(texel.rgb, vec3(0.0, 0.0, 1.0), 0.8), texel.a);
 		break;
+	case 4:
+		out_Color = vec4(0.0, 0.35, 0.0, 1.0);
+		break;
 	default:
 		out_Color = ex_Color;
 		break;
