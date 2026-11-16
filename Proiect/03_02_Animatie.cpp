@@ -68,28 +68,15 @@ float middleCarY = 0.0, viteza = 0.6, Bbeta = 0.02, angle = -0.0f;
 float rightCarY = 0.0;
 
 // Coordonate pentru masina care face depasirea
-float passingCarX = 0.0, passingCarY = -14.0;
+float passingCarX = 130.0, passingCarY = -200.0;
 
-// 0 inseamna ca inca nu poate depasi masina, 1 inseamna ca se depaseste, 2 inseamna ca s-a terminat depasirea
-int codDepasire = 0;
-float vitezaDepasire = 3.0f;
+// -2 inseamna ca e in spatele masinii, -1 inseamna ca trece in depasire, 0 inseamna ca inca nu poate depasi masina, 1 inseamna ca se depaseste, 2 inseamna ca s-a terminat depasirea
+int codDepasire = -2;
+float vitezaDepasire = 3.0f * 2;
 
-
-//	Functie pentru afisarea matricei de transformare;
-void DisplayMatrix()
-{
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-			cout << myMatrix[i][j] << "  ";
-		cout << endl;
-	};
-	cout << "\n";
-};
 
 // Miscarea masinii depasitoare
 void AnimeazaDepasire(void){
-
 	// Daca merg offscreen, they loop
 	if (rightCarY > 600.0f){
 		rightCarY = -200.0f;
@@ -100,24 +87,47 @@ void AnimeazaDepasire(void){
 	}
 
 	if (passingCarY > 600.0f){
-		passingCarY = -200.0f;
-		passingCarX = 0.0f;
+		passingCarY = -500.0f;
+		passingCarX = 130.0f;
 		angle = 0.0f;
-		codDepasire = 0;
+		codDepasire = -2;
 	}
 
 	// Codul din MoveUp
 	middleCarY += viteza * 2.5;
 	rightCarY += viteza * 3.1;
 
-	
 	float distanta = passingCarY - middleCarY;
 
 	switch (codDepasire)
     {
+		case -2:
+			passingCarY += vitezaDepasire - 0.3f;
+			if (distanta < -130.0f && distanta > -150.0f)			{
+				codDepasire = -1;
+			}
+			break;
+
+		case -1:
+			passingCarY += vitezaDepasire;
+			passingCarX -= 4.5f * 2;
+
+			if (angle < 0.51f)
+				angle += 0.05f;
+
+			if (passingCarX <= 0.0f)
+			{
+				passingCarX = 0.0f;
+				codDepasire = 0;
+			}
+			break;
+
         case 0:
             passingCarY += vitezaDepasire - 0.3f;
-            if (distanta > 170.0f && distanta < 190.0f)
+			if (angle > 0.05f)
+				angle -= 0.05f;
+
+            if (distanta > 130.0f && distanta < 150.0f)
             {
                 codDepasire = 1;
             }
@@ -125,12 +135,12 @@ void AnimeazaDepasire(void){
 
         case 1:
             passingCarY += vitezaDepasire;
-            passingCarX += 4.5f;
+            passingCarX += 4.5f * 2;
 
 			middleCarY -= 0.9f;
 
 			// Unghi gradual, frumos. deosebit
-			if (angle > -0.36f)
+			if (angle > -0.51f)
             	angle -= 0.05f;
 
             if (passingCarX > 130.0f)
@@ -142,7 +152,7 @@ void AnimeazaDepasire(void){
         case 2:
             passingCarY += viteza + 2;
 			
-			if (angle < -0.05f)
+			if (angle < -0.00f)
 			angle += 0.05f;
 			
             break;
