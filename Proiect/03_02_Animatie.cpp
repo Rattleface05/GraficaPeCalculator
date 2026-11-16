@@ -96,7 +96,7 @@ void AnimeazaDepasire(void){
 	}
 
 	if (passingCarY > 600.0f){
-		passingCarY = -500.0f;
+		passingCarY = min(-200.0f, middleCarY - 200.0f);
 		passingCarX = 130.0f;
 		angle = 0.0f;
 		codDepasire = -2;
@@ -159,7 +159,7 @@ void AnimeazaDepasire(void){
             break;
 
         case 2:
-            passingCarY += vitezaDepasire - 1;
+            passingCarY += viteza + 2;
 			
 			if (angle < -0.00f)
 			angle += 0.05f;
