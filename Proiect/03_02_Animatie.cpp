@@ -514,7 +514,7 @@ void RenderFunction(void)
 	glDrawArrays(GL_LINES, 4, 4);
 	
 	// Copacei
-	codCol = 4;
+	codCol = 5;
 	glBindVertexArray(TreeVaoId);
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &resizeMatrix[0][0]);
 	glUniform1i(codColLocation, codCol);
@@ -541,8 +541,10 @@ void RenderFunction(void)
 	glUniform1i(codColLocation, codCol);
 	glDrawArrays(GL_POLYGON, 0, 4);
 
+	codCol = 4;
 	myMatrix = resizeMatrix * matrTransl2;
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+	glUniform1i(codColLocation, codCol);
 	glDrawArrays(GL_POLYGON, 4, 4);
 
 	codCol = 3;

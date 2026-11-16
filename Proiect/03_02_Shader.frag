@@ -43,7 +43,10 @@ void main(void)
 	case 3: 
 		out_Color = vec4(mix(texel.rgb, vec3(0.0, 0.0, 1.0), 0.8), texel.a);
 		break;
-	case 4:
+	case 4: 
+		out_Color = vec4(mix(texel.rgb, vec3(0.2, 0.2, 0.2), 0.8), texel.a);
+		break;
+	case 5:
 		out_Color = vec4(0.0, 0.35, 0.0, 1.0);
 		break;
 	default:
