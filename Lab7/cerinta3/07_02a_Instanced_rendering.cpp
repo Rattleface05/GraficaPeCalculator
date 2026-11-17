@@ -12,7 +12,10 @@
 // 
 // 
 //	Biblioteci
-#include <windows.h>        //	Utilizarea functiilor de sistem Windows (crearea de ferestre, manipularea fisierelor si directoarelor);
+
+#define GLM_ENABLE_EXPERIMENTAL
+
+// #include <windows.h>        //	Utilizarea functiilor de sistem Windows (crearea de ferestre, manipularea fisierelor si directoarelor);
 #include <stdlib.h>         //  Biblioteci necesare pentru citirea shaderelor;
 #include <stdio.h>
 #include <GL/glew.h>        //  Definește prototipurile functiilor OpenGL si constantele necesare pentru programarea OpenGL moderna; 
@@ -114,16 +117,18 @@ void CreateVBO(void)
 	//	COORDONATELE varfurilor; 
 	GLfloat Vertices[] =
 	{
-		//  Punctele din planul z = -50;                   		
-		-50.0f, -50.0f, -50.0f,  1.0f,
-		 50.0f, -50.0f, -50.0f,  1.0f,
-		 50.0f,  50.0f, -50.0f,  1.0f,
-		-50.0f,  50.0f, -50.0f,  1.0f,
-		//  Punctele din planul z = +50;                   		
-		-50.0f, -50.0f,  50.0f,  1.0f,
-		 50.0f, -50.0f,  50.0f,  1.0f,
-		 50.0f,  50.0f,  50.0f,  1.0f,
-		-50.0f,  50.0f,  50.0f,  1.0f,
+		//	Varfurile VERZI din planul z = -50;  
+		//	Coordonate;
+		-50.0f, -50.0f, -50.0f,  1.0f,  
+		 50.0f, -50.0f, -50.0f,  1.0f,  
+		//	Varfurile ROSII din planul z = +50;
+		//	Coordonate;
+		-50.0f, -50.0f,  50.0f,  1.0f, 
+		 50.0f, -50.0f,  50.0f,  1.0f, 
+		
+		// Varful piramidei		
+		//	Coordonate;	
+		0.0f, 25.0f, 0.0f, 1.0f, 				
 	};
 
 	//	CULORILE instantelor;
@@ -144,7 +149,7 @@ void CreateVBO(void)
 		MatModel[instID] =
 			glm::translate(glm::mat4(1.0f), glm::vec3(90 * instID * cos(instID),	//	Deplasarea pe OX;
 													  90 * instID * sin(instID),	//	Deplasarea pe OY; 
-													  0.0))									//	Deplasarea pe OZ;
+													  90 * instID * sin(instID) * cos(instID)))									//	Deplasarea pe OZ;
 			* glm::rotate(glm::mat4(1.0f), (instID + 1) * PI / 10, glm::vec3(1, 0, 0))
 			* glm::rotate(glm::mat4(1.0f),        instID * PI / 6, glm::vec3(0, 1, 0))
 			* glm::rotate(glm::mat4(1.0f),    3 * instID * PI / 2, glm::vec3(0, 0, 1));
@@ -153,18 +158,17 @@ void CreateVBO(void)
 	//  Indicii pentru varfuri;
 	GLuint Indices[] =
 	{
-		1, 0, 2,   2, 0, 3, //  Fata "de jos";
-		2, 3, 6,   6, 3, 7, //	Lateral;
-		7, 3, 4,   4, 3, 0, //	Lateral; 
-		4, 0, 5,   5, 0, 1, //	Lateral; 
-		1, 2, 5,   5, 2, 6, //	Lateral; 
-		5, 6, 4,   4, 6, 7,	//  Fata "de sus";
-		0, 1, 2, 3,			//	Contur fata de jos;
-		4, 5, 6, 7,			//	Contur fata de sus;
-		0, 4,				//	Muchie laterala;
-		1, 5,				//	Muchie laterala;
-		2, 6,				//	Muchie laterala;
-		3, 7				//	Muchie laterala;
+		0, 2, 3,   0, 1, 3, //  Fata "de jos";
+		0, 4, 1, 			// Fata din spate;
+		0, 4, 2, 			// Fata din stanga
+		0, 3,
+		3, 4, 1, 			// Fata din dreapta
+		3, 4, 2,			// Fata din fata
+		3, 2, 0, 1,			// Contur de jos
+		3, 4, 
+		0, 4,
+		2, 4,
+		1, 4,
 	};
 
 	//  Transmiterea datelor prin buffere;
@@ -293,15 +297,14 @@ void RenderFunction(void)
 	//	 - arg3 = tipul de date al indicilor;
 	//	 - arg4 = pointer spre indici (EBO): pozitia de start a indicilor;
 	//	 - arg5 = numarul de instante; 
-	glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0, INSTANCE_COUNT);
+	glDrawElementsInstanced(GL_TRIANGLES, 21, GL_UNSIGNED_INT, 0, INSTANCE_COUNT);
 	
 	//  Desenarea muchiilor;
 	codCol = 1;															//	Se schimba culoarea;
 	glUniform1i(codColLocation, codCol);
 	glLineWidth(2.5);
-	glDrawElementsInstanced(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (void*)(36 * sizeof(GLuint)), INSTANCE_COUNT);
-	glDrawElementsInstanced(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (void*)(40 * sizeof(GLuint)), INSTANCE_COUNT);
-	glDrawElementsInstanced(GL_LINES,     8, GL_UNSIGNED_INT, (void*)(44 * sizeof(GLuint)), INSTANCE_COUNT);
+	glDrawElementsInstanced(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (void*)(21 * sizeof(GLuint)), INSTANCE_COUNT);
+	glDrawElementsInstanced(GL_LINES,     8, GL_UNSIGNED_INT, (void*)(24 * sizeof(GLuint)), INSTANCE_COUNT);
 
 	glutSwapBuffers();	//	Inlocuieste imaginea deseneata in fereastra cu cea randata; 
 	glFlush();			//  Asigura rularea tuturor comenzilor OpenGL apelate anterior;

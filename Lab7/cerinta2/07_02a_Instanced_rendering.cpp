@@ -304,7 +304,7 @@ void RenderFunction(void)
 	glUniform1i(codColLocation, codCol);
 	glLineWidth(2.5);
 	glDrawElementsInstanced(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, (void*)(21 * sizeof(GLuint)), INSTANCE_COUNT);
-	glDrawElementsInstanced(GL_LINES,     4, GL_UNSIGNED_INT, (void*)(24 * sizeof(GLuint)), INSTANCE_COUNT);
+	glDrawElementsInstanced(GL_LINES,     8, GL_UNSIGNED_INT, (void*)(24 * sizeof(GLuint)), INSTANCE_COUNT);
 
 	glutSwapBuffers();	//	Inlocuieste imaginea deseneata in fereastra cu cea randata; 
 	glFlush();			//  Asigura rularea tuturor comenzilor OpenGL apelate anterior;
