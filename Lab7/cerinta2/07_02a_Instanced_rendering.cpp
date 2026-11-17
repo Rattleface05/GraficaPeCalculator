@@ -12,7 +12,10 @@
 // 
 // 
 //	Biblioteci
-#include <windows.h>        //	Utilizarea functiilor de sistem Windows (crearea de ferestre, manipularea fisierelor si directoarelor);
+
+#define GLM_ENABLE_EXPERIMENTAL
+
+// #include <windows.h>        //	Utilizarea functiilor de sistem Windows (crearea de ferestre, manipularea fisierelor si directoarelor);
 #include <stdlib.h>         //  Biblioteci necesare pentru citirea shaderelor;
 #include <stdio.h>
 #include <GL/glew.h>        //  Definește prototipurile functiilor OpenGL si constantele necesare pentru programarea OpenGL moderna; 
@@ -144,7 +147,7 @@ void CreateVBO(void)
 		MatModel[instID] =
 			glm::translate(glm::mat4(1.0f), glm::vec3(90 * instID * cos(instID),	//	Deplasarea pe OX;
 													  90 * instID * sin(instID),	//	Deplasarea pe OY; 
-													  0.0))									//	Deplasarea pe OZ;
+													  90 * instID * sin(instID) * cos(instID)))									//	Deplasarea pe OZ;
 			* glm::rotate(glm::mat4(1.0f), (instID + 1) * PI / 10, glm::vec3(1, 0, 0))
 			* glm::rotate(glm::mat4(1.0f),        instID * PI / 6, glm::vec3(0, 1, 0))
 			* glm::rotate(glm::mat4(1.0f),    3 * instID * PI / 2, glm::vec3(0, 0, 1));

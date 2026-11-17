@@ -125,31 +125,30 @@ void CreateVBO(void)
 		//	Coordonate;					Culori;			
 		-50.0f, -50.0f, -50.0f,  1.0f,  0.0f, 1.0f, 0.0f,
 		 50.0f, -50.0f, -50.0f,  1.0f,  0.0f, 0.9f, 0.0f,
-		 50.0f,  50.0f, -50.0f,  1.0f,  0.0f, 0.6f, 0.0f,
-		-50.0f,  50.0f, -50.0f,  1.0f,	0.0f, 0.2f, 0.0f,
 		//	Varfurile ROSII din planul z = +50;
 		//	Coordonate;					Culori;			
 		-50.0f, -50.0f,  50.0f,  1.0f,  1.0f, 0.0f, 0.0f,
 		 50.0f, -50.0f,  50.0f,  1.0f,  0.7f, 0.0f, 0.0f,
-		 50.0f,  50.0f,  50.0f,  1.0f,  0.5f, 0.0f, 0.0f,
-		-50.0f,  50.0f,  50.0f,  1.0f,	0.1f, 0.0f, 0.0f,
+		
+		// Varful piramidei		
+		//	Coordonate;					Culori;			
+		0.0f, 25.0f, 0.0f, 1.0f, 		0.0f, 0.0f, 1.0f		
 	};
 
 	//  Indicii pentru varfuri;
 	GLubyte Indices[] =
 	{
-		1, 0, 2,   2, 0, 3, //  Fata "de jos";
-		2, 3, 6,   6, 3, 7, //	Lateral;
-		7, 3, 4,   4, 3, 0, //	Lateral; 
-		4, 0, 5,   5, 0, 1, //	Lateral; 
-		1, 2, 5,   5, 2, 6, //	Lateral; 
-		5, 6, 4,   4, 6, 7,	//  Fata "de sus";
-		0, 1, 2, 3,			//	Contur fata de jos;
-		4, 5, 6, 7,			//	Contur fata de sus;
-		0, 4,				//	Muchie laterala;
-		1, 5,				//	Muchie laterala;
-		2, 6,				//	Muchie laterala;
-		3, 7				//	Muchie laterala;
+		0, 2, 3,   0, 1, 3, //  Fata "de jos";
+		0, 4, 1, 			// Fata din spate;
+		0, 4, 2, 			// Fata din stanga
+		0, 3,
+		3, 4, 1, 			// Fata din dreapta
+		3, 4, 2,			// Fata din fata
+		3, 2, 0, 1,			// Contur de jos
+		3, 4, 
+		0, 4,
+		2, 4,
+		1, 4,
 	};
 
 	//  Transmiterea datelor prin buffere;
@@ -242,9 +241,9 @@ void RenderFunction(void)
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
 	//	Realizarea proiectiei - pot fi testate si alte variante;
-	projection = glm::ortho(xMin, xMax, yMin, yMax, dNear, dFar);
+	// projection = glm::ortho(xMin, xMax, yMin, yMax, dNear, dFar);
 	//	projection = glm::frustum(xMin, xMax, yMin, yMax, dNear, dFar);
-	//	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), dNear, dFar);
+	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), dNear, dFar);
 	//	projection = glm::infinitePerspective(fov, GLfloat(width) / GLfloat(height), dNear); 
 	glUniformMatrix4fv(projLocation, 1, GL_FALSE, &projection[0][0]);
 
@@ -256,15 +255,14 @@ void RenderFunction(void)
 	//	 - arg2 = numarul de varfuri;
 	//	 - arg3 = tipul de date al indicilor;
 	//	 - arg4 = pointer spre indici (EBO): pozitia de start a indicilor;
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, (void*)(0));
+	glDrawElements(GL_TRIANGLES, 21, GL_UNSIGNED_BYTE, (void*)(0));
 
 	//  Desenarea muchiilor;
 	codCol = 1;															//	Se schimba culoarea;
 	glUniform1i(codColLocation, codCol);
 	glLineWidth(3.5);
-	glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(36));
-	glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(40));
-	glDrawElements(GL_LINES, 8, GL_UNSIGNED_BYTE, (void*)(44));
+	glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_BYTE, (void*)(21));
+	glDrawElements(GL_LINES, 8, GL_UNSIGNED_BYTE, (void*)(24));
 
 	glutSwapBuffers();	//	Inlocuieste imaginea deseneata in fereastra cu cea randata; 
 	glFlush();			//  Asigura rularea tuturor comenzilor OpenGL apelate anterior;
